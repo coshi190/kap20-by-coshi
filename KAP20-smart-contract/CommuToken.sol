@@ -13,6 +13,10 @@ contract CommuToken is KAP20, IKAP20AdminApprove {
     uint256 public constant HARD_CAP = 10_000_000 ether;
 
     address public owner;
+    modifier onlyOwner() {
+        require(owner == msg.sender, "Ownable: caller is not the owner");
+        _;
+    }
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     constructor(
@@ -25,15 +29,14 @@ contract CommuToken is KAP20, IKAP20AdminApprove {
         owner = msg.sender;
     }
 
-    function transferOwnership(address _newOwner) external {
+    function transferOwnership(address _newOwner) external onlyOwner {
         require(_newOwner != address(0), "Ownable: new owner is the zero address");
         address oldOwner = owner;
         owner = _newOwner;
         emit OwnershipTransferred(oldOwner, _newOwner);
     }
 
-    function mint(address _to, uint256 _amount) external whenNotPaused returns (bool) {
-        require(owner == msg.sender, "Ownable: caller is not the owner");
+    function mint(address _to, uint256 _amount) external whenNotPaused onlyOwner returns (bool) {
         _mint(_to, _amount);
         return true;
     }
