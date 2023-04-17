@@ -12,15 +12,28 @@ contract CommuToken is KAP20, IKAP20AdminApprove {
 
     uint256 public constant HARD_CAP = 10_000_000 ether;
 
+    address public owner;
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
     constructor(
         address _adminRouter,
         address _kyc,
         address _committee,
         address _transferRouter,
         uint256 _acceptedKycLevel
-    ) KAP20("Commu Token", "CMM", 18, _adminRouter, _committee, _kyc, _acceptedKycLevel, _transferRouter) {}
+    ) KAP20("Commu Token", "CMM", 18, _adminRouter, _committee, _kyc, _acceptedKycLevel, _transferRouter) {
+        owner = msg.sender;
+    }
 
-    function mint(address _to, uint256 _amount) external whenNotPaused onlySuperAdmin returns (bool) {
+    function transferOwnership(address _newOwner) external {
+        require(_newOwner != address(0), "Ownable: new owner is the zero address");
+        address oldOwner = owner;
+        owner = _newOwner;
+        emit OwnershipTransferred(oldOwner, _newOwner);
+    }
+
+    function mint(address _to, uint256 _amount) external whenNotPaused returns (bool) {
+        require(owner == msg.sender, "Ownable: caller is not the owner");
         _mint(_to, _amount);
         return true;
     }
