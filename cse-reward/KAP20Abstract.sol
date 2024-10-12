@@ -63,6 +63,8 @@ abstract contract AccessController is KYCHandler, Authorization, Committee {
 
     event AdminProjectRouterSet(address indexed oldAdminProjectRouter, address indexed newAdminProjectRouter, address indexed caller);
 
+    event OwnerSet(address indexed oldOwner, address indexed newOwner, address indexed caller);
+
     modifier onlyOwner() {
         require(msg.sender == owner, "KAP20: Restricted only owner");
         _;
@@ -101,9 +103,15 @@ abstract contract AccessController is KYCHandler, Authorization, Committee {
     }
 
     function setAdminProjectRouter(address _adminProjectRouter) external onlyOwnerOrCommittee {
-        require(_adminProjectRouter != address(0), "Authorization: new admin project router is the zero address");
+        require(_adminProjectRouter != address(0), "AccessController: new admin project router is the zero address");
         emit AdminProjectRouterSet(address(adminProjectRouter), _adminProjectRouter, msg.sender);
         adminProjectRouter = IAdminProjectRouter(_adminProjectRouter);
+    }
+
+    function setOwner(address _owner) external onlyOwnerOrCommittee {
+        require(_owner != address(0), "AccessController: new owner is the zero address");
+        emit OwnerSet(owner, _owner, msg.sender);
+        owner = _owner;
     }
 }
 
